@@ -1,0 +1,38 @@
+metricbeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
+      
+metricbeat.modules:
+- module: docker
+  metricsets:
+    - "container"
+    - "cpu"
+    - "diskio"
+    - "event"
+    - "healthcheck"
+    - "info"
+    #- "image"
+    - "memory"
+    - "network"
+  hosts: ["unix:///var/run/docker.sock"]
+  period: 10s
+  enabled: true
+  
+# Kafka metrics collected using the Kafka protocol
+#- module: kafka
+#  metricsets:
+#    - broker
+#    - partition
+#    - consumergroup
+#    - producer
+#    - consumer
+#  period: 10s
+#  hosts: ["10.25.249.5:9092"]
+#  enabled: true
+
+output.elasticsearch:
+  hosts: ["http://10.25.249.130:9200"]
+
+setup.kibana:
+  host: "http://10.25.249.130:5601"
