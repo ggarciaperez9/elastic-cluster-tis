@@ -28,11 +28,11 @@ metricbeat.modules:
 #    - producer
 #    - consumer
 #  period: 10s
-#  hosts: ["10.25.249.5:9092"]
+#  hosts: ["10.155.149.104:9092"]
 #  enabled: true
 
 output.elasticsearch:
-  hosts: ["http://10.25.249.130:9200"]
+  hosts: ["http://10.155.149.105:9200"]
 
 setup.kibana:
-  host: "http://10.25.249.130:5601"
+  host: "http://10.155.149.105:5601"

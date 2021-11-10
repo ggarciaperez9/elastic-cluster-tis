@@ -15,7 +15,7 @@ filebeat.autodiscover:
                     - /var/lib/docker/containers/${data.docker.container.id}/*.log
 
 output.elasticsearch:
-  hosts: ["http://10.25.249.130:9200"]
+  hosts: ["http://10.155.149.105:9200"]
 
 setup.kibana:
-  host: "http://10.25.249.130:5601"
+  host: "http://10.155.149.105:5601"

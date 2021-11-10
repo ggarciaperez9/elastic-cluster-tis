@@ -1,6 +1,65 @@
 ---
 version: '2'
 services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
+    container_name: elasticsearch
+    restart: always
+    ports:
+      - 9200:9200
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+      memlock:
+        soft: -1
+        hard: -1        
+    environment:
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms2g -Xmx2g"
+      discovery.type: "single-node"
+      node.store.allow_mmap: "false"
+      node.name: "elasticsearch"
+      node.ml: "false"
+      xpack.ml.enabled: "false"
+    volumes:
+      - ./esdata1:/usr/share/elasticsearch/data:rw
+      
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.10.1
+    container_name: kibana
+    restart: always
+    depends_on:
+      - elasticsearch
+    ports:
+      - 5601:5601
+    links:
+      - elasticsearch
+    environment:
+      xpack.security.enabled: "false"
+      discovery.type: "single-node"
+      server.host: "kibana"
+      server.name: "kibana"
+      elasticsearch.hosts: "http://elasticsearch:9200"
+    command: 
+      - /bin/bash
+      - -c 
+      - |
+        #rm -rf plugins/lost+found
+        echo "Installing Kibana plugins" 
+        bin/kibana-plugin remove enhancedTable
+        #bin/kibana-plugin remove vega_vis
+        bin/kibana-plugin install https://github.com/fbaligand/kibana-enhanced-table/releases/download/v1.10.1/enhanced-table-1.10.1_7.10.1.zip --allow-root
+        #bin/kibana-plugin install file:///kibana_plugings/datasweet_formula-2.2.1_kibana-7.1.1.zip --allow-root
+        bin/kibana-plugin install https://github.com/ggarciaperez9/kibana_plugings/raw/main/datasweet_formula-2.2.1_kibana-7.1.1.zip --allow-root
+        bin/kibana-plugin install https://github.com/ommsolutions/kibana_ext_metrics_vis/releases/download/7.4.2/kibana_ext_metrics_vis_7.4.2.zip --allow-root
+        bin/kibana-plugin install https://github.com/ggarciaperez9/kibana_plugings/raw/main/kibana_milestones_vis-7.8.0.zip --allow-root
+        bin/kibana-plugin install https://github.com/ggarciaperez9/kibana_plugings/raw/main/prelert_swimlane_vis-7.6.2.zip --allow-root
+        #bin/kibana-plugin install https://github.com/outbrain/ob-kb-percent/archive/master.zip --allow-root
+        #bin/kibana-plugin install https://github.com/nyurik/kibana-vega-vis/releases/download/v1.2.0/vega_vis-1.2.0--for-Kibana-6.2.4.zip --allow-root
+        bin/kibana &
+        sleep infinity
+      
   filebeat:
     image: docker.elastic.co/beats/filebeat:7.10.1
     container_name: filebeat
@@ -9,7 +68,6 @@ services:
     user: root
     environment:
       - strict.perms=false
-      - TZ=Europe/Paris
     volumes:
       - './filebeat.yml:/usr/share/filebeat/filebeat.yml:ro'
       - '/var/run/docker.sock:/var/run/docker.sock'
@@ -23,10 +81,10 @@ services:
     user: root
     environment:
       - strict.perms=false
-      - TZ=Europe/Paris
     volumes:
       - './metricbeat.docker.yml:/usr/share/metricbeat/metricbeat.yml:ro'
       - '/var/run/docker.sock:/var/run/docker.sock'
       - '/sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro'
       - '/proc:/hostfs/proc:ro'
       - '/:/hostfs:ro'
+
