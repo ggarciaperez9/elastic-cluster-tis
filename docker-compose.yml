@@ -1,0 +1,32 @@
+---
+version: '2'
+services:
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.10.1
+    container_name: filebeat
+    hostname: filebeat
+    restart: always
+    user: root
+    environment:
+      - strict.perms=false
+      - TZ=Europe/Paris
+    volumes:
+      - './filebeat.yml:/usr/share/filebeat/filebeat.yml:ro'
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - '/var/lib/docker/containers/:/var/lib/docker/containers/:ro'
+        
+  metricbeat:
+    image: docker.elastic.co/beats/metricbeat:7.10.1
+    container_name: metricbeat
+    hostname: metricbeat
+    restart: always
+    user: root
+    environment:
+      - strict.perms=false
+      - TZ=Europe/Paris
+    volumes:
+      - './metricbeat.docker.yml:/usr/share/metricbeat/metricbeat.yml:ro'
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - '/sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro'
+      - '/proc:/hostfs/proc:ro'
+      - '/:/hostfs:ro'
