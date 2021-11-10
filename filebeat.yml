@@ -1,0 +1,21 @@
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      templates:
+        - condition:
+            contains:
+              docker.container.image: confluentinc/cp-kafka:6.0.0
+          config:
+            - module: kafka
+              log:
+                enabled: true
+                input:
+                  type: container
+                  paths:
+                    - /var/lib/docker/containers/${data.docker.container.id}/*.log
+
+output.elasticsearch:
+  hosts: ["http://10.25.249.130:9200"]
+
+setup.kibana:
+  host: "http://10.25.249.130:5601"
